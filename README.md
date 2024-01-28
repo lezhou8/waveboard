@@ -11,3 +11,5 @@ go install github.com/lezhou8/waveboard@latest
 ## Usage
 
 Just run `waveboard` on your terminal and mash away at your keyboard
+
+<img src="assets/c_major.gif" alt="c major">
