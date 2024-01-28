@@ -22,6 +22,14 @@ const (
 
 var freqSet = mapset.NewSet()
 
+type playLengthMode int
+
+const (
+	short playLengthMode = iota
+	long
+	extraLong
+)
+
 func inIgnoredKeys(char rune) bool {
 	if char < asciiBottomLimit || asciiTopLimit < char || char == '`' ||
 		char == '+' || char == '-' || char == '=' || char == '_' {
@@ -75,7 +83,7 @@ func main() {
 	ctrl := &beep.Ctrl{Streamer: noise(sr.D(1).Seconds()), Paused: false}
 	volume := &effects.Volume{Streamer: ctrl, Base: 2, Volume: 0, Silent: false}
 	speaker.Play(volume)
-	longMode := false
+	keyPressLength := short
 
 	if err := keyboard.Open(); err != nil {
 		log.Fatalf("Error while trying to open keyboard: %s", err)
@@ -179,14 +187,14 @@ func main() {
 			log.Printf("Error while getting keypress: %s", err)
 		}
 
-		switch key {
-		case keyboard.KeyEsc:
+		if key == keyboard.KeyEsc {
 			return
-		case keyboard.KeyCtrlC:
+		} else if key == keyboard.KeyCtrlC {
 			return
-		case keyboard.KeySpace:
+		} else if key == keyboard.KeySpace {
 			ctrl.Paused = true
 			log.Println("Rest")
+			continue
 		}
 
 		if char == '+' {
@@ -199,8 +207,22 @@ func main() {
 			volume.Volume = 0.0
 			log.Printf("Volume: %f\n", volume.Volume)
 		} else if char == '~' {
-			longMode = !longMode
-			log.Printf("Long mode: %t\n", longMode)
+			if keyPressLength == short || keyPressLength == extraLong {
+				keyPressLength = long
+				log.Printf("Key press length: long\n")
+			} else {
+				keyPressLength = short
+				log.Printf("Key press length: short\n")
+			}
+		} else if char == '_' {
+			if keyPressLength == short || keyPressLength == long {
+				keyPressLength = extraLong
+				log.Printf("Key press length: extra long\n")
+			} else {
+				keyPressLength = short
+				log.Printf("Key press length: short\n")
+			}
+
 		}
 
 		if inIgnoredKeys(char) {
@@ -213,10 +235,12 @@ func main() {
 		freqSet.Add(freq)
 
 		go func() {
-			if longMode {
+			if keyPressLength == extraLong {
+				time.Sleep(1000 * time.Millisecond)
+			} else if keyPressLength == long {
 				time.Sleep(500 * time.Millisecond)
 			} else {
-				time.Sleep(200 * time.Millisecond)
+				time.Sleep(250 * time.Millisecond)
 			}
 			freqSet.Remove(freq)
 		}()
