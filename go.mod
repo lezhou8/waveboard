@@ -1,4 +1,4 @@
-module github.com/lezhou8/beep_tutorial
+module github.com/lezhou8/waveboard
 
 go 1.21.6
 
