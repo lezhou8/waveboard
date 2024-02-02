@@ -30,11 +30,10 @@ const (
 var (
 	hasStarted bool
 	titleFont  font.Face
+	fft fourier.FFT
 )
 
-type game struct {
-	fft fourier.FFT
-}
+type game struct {}
 
 func (g *game) Update() error {
 	if !hasStarted {
@@ -74,7 +73,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 		}
 		amps[i] = sum
 	}
-	coeffs := g.fft.Coefficients(nil, amps)
+	coeffs := fft.Coefficients(nil, amps)
 	coeffsLen := len(coeffs)
 
 	columnWidth := float32(width / coeffsLen)
@@ -112,11 +111,12 @@ func main() {
 	})
 
 	hasStarted = false
+	fft = *fourier.NewFFT(columns)
 
 	ebiten.SetWindowTitle("Wave Board")
 	ebiten.SetWindowSize(width, height)
 
-	if err := ebiten.RunGame(&game{fft: *fourier.NewFFT(columns)}); err != nil {
+	if err := ebiten.RunGame(&game{}); err != nil {
 		log.Fatal(err)
 	}
 }
