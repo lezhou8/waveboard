@@ -5,7 +5,6 @@ import (
 	"log"
 	"math"
 	"math/cmplx"
-	"slices"
 	"time"
 
 	"github.com/gopxl/beep"
@@ -31,7 +30,6 @@ const (
 var (
 	hasStarted bool
 	titleFont  font.Face
-	red        = color.RGBA{0xff, 0x00, 0x00, 0xff}
 )
 
 type game struct {
@@ -40,7 +38,7 @@ type game struct {
 
 func (g *game) Update() error {
 	if !hasStarted {
-		if slices.Contains(inpututil.AppendJustReleasedKeys(nil), ebiten.KeySpace) {
+		if len(inpututil.AppendJustReleasedKeys(nil)) != 0 {
 			hasStarted = true
 			start = time.Now()
 		}
@@ -64,7 +62,7 @@ func (g *game) Update() error {
 
 func (g *game) Draw(screen *ebiten.Image) {
 	if !hasStarted {
-		text.Draw(screen, "Press space to start", titleFont, 30, 50, color.White)
+		text.Draw(screen, "Press any key to start", titleFont, 30, 50, color.White)
 		return
 	}
 
@@ -84,12 +82,13 @@ func (g *game) Draw(screen *ebiten.Image) {
 		columnLen := float32(cmplx.Abs(coeffs[i])) * 10.0
 		vector.DrawFilledRect(
 			screen,
-			float32(float32(i)*columnWidth),
+			float32(i)*columnWidth,
 			height-columnLen-20,
 			columnWidth,
 			columnLen,
-			red,
-			false)
+			color.RGBA{0xff, uint8((float32(i) / float32(coeffsLen)) * 180), 0x00, 0xff},
+			false,
+		)
 	}
 }
 
