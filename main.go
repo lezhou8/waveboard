@@ -30,10 +30,10 @@ const (
 var (
 	hasStarted bool
 	titleFont  font.Face
-	fft fourier.FFT
+	fft        fourier.FFT
 )
 
-type game struct {}
+type game struct{}
 
 func (g *game) Update() error {
 	if !hasStarted {
@@ -115,7 +115,6 @@ func main() {
 
 	ebiten.SetWindowTitle("Wave Board")
 	ebiten.SetWindowSize(width, height)
-
 	if err := ebiten.RunGame(&game{}); err != nil {
 		log.Fatal(err)
 	}
